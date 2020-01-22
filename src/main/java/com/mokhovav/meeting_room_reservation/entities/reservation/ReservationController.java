@@ -1,16 +1,13 @@
-package com.mokhovav.meeting_room_reservation.controllers;
+package com.mokhovav.meeting_room_reservation.entities.reservation;
 
-import com.mokhovav.meeting_room_reservation.datatables.Reservation;
-import com.mokhovav.meeting_room_reservation.datatables.User;
+import com.mokhovav.meeting_room_reservation.entities.user.User;
+import com.mokhovav.meeting_room_reservation.error.CustomException;
 import com.mokhovav.meeting_room_reservation.responses.DailySchedule;
-import com.mokhovav.meeting_room_reservation.services.ReservationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -18,21 +15,26 @@ import java.util.*;
 import org.slf4j.Logger;
 
 @Controller
-@RequestMapping("/conferences")
+//@RequestMapping("/conferences")
 public class ReservationController {
-    @Autowired
-    Logger logger;
 
+    final Logger logger;
     final ReservationService reservationService;
-
+    final ReservationValid reservationValid;
     private int startWeak = 0;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, Logger logger, ReservationValid reservationValid) {
         this.reservationService = reservationService;
+        this.logger = logger;
+        this.reservationValid = reservationValid;
     }
 
     @GetMapping
     public String conferences(@AuthenticationPrincipal User user, Model model){
+
+        if (user != null && user.isChangePassword())
+            return "redirect:/user/changePassword";
+
         List<DailySchedule> list = reservationService.getSchedule(startWeak);
         model.addAttribute("schedule",list);
 
@@ -42,28 +44,29 @@ public class ReservationController {
         model.addAttribute("time", time);
         int temp = 0;
         model.addAttribute("temp",temp);
-
         return "conferences";
     }
 
     @GetMapping("prevWeek")
     public String prevWeek(Model model){
         startWeak--;
-        return "redirect:/conferences";
+        return "redirect:/";//"redirect:/conferences";
     }
+
     @GetMapping("nextWeek")
     public String nextWeek(Model model){
         startWeak++;
-        return "redirect:/conferences";
+        return "redirect:/";//"redirect:/conferences";
     }
 
     @GetMapping("addReservation")
-    public String addConference(Model model){
+    public String addReservation(Model model){
         model.addAttribute("isAdd", true);
         return "addreservation";
     }
+
     @GetMapping("showReservation/{reservationId}")
-    public String showConference(@PathVariable Long reservationId, Model model){
+    public String showReservation(@PathVariable Long reservationId, Model model){
         Reservation reservation = reservationService.getById(reservationId);
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         DateFormat timeFormat = new SimpleDateFormat("HH:mm");
@@ -74,52 +77,30 @@ public class ReservationController {
         model.addAttribute("time", timeFormat.format(reservation.getTimeBegin()));
         model.addAttribute("duration", (reservation.getTimeEnd() - reservation.getTimeBegin())/60000);
         model.addAttribute("isAdd", false);
-
         return "addreservation";
     }
 
-
     @PostMapping("addReservation")
-    public String addConference(
+    public String addReservation(
             @AuthenticationPrincipal User user,
             @RequestParam String title,
             @RequestParam String description,
             @RequestParam Integer duration,
             @RequestParam String date,
             @RequestParam String time,
-            Model model){
-        model.addAttribute("isAdd", true);
-        //logger.info("Time: " + time);
-        if (!reservationService.isValid(user,title,description,duration,date,time)) {
-            model.addAttribute("message", "Invalid data");
-            return "addreservation";
-        }
+            Model model) {
         Reservation reservation = new Reservation();
-        reservation.setUser(user);
         reservation.setTitle(title);
         reservation.setDescription(description);
-        //reservation.setDuration(duration);
-        reservation.setTimeBegin(Timestamp.valueOf(date + " " + time + ":00").getTime());
-        reservation.setTimeEnd(reservationService.getTimeEnd(reservation.getTimeBegin(),duration));
-    /*
-        logger.info("*****************************************************************************************");
-        logger.info(reservation.getUser().getUserName());
-        logger.info(reservation.getTitle());
-        logger.info(reservation.getDescription());
-        logger.info(String.valueOf(reservation.getTimeBegin()));
-        logger.info(String.valueOf(reservation.getTimeEnd()));
-        logger.info("*****************************************************************************************");
-    */
-        if (reservationService.isCanBeBooked(reservation)){
-            reservationService.save(reservation);
-            model.addAttribute("message", "Success!");
+        try {
+            reservationService.addReservation(reservation, user, title, description, duration, date, time);
+        } catch (CustomException e) {
+            model.addAttribute("message", e.getMessage());
         }
-        else
-            model.addAttribute("message", "Meeting room busy at this time!");
-            model.addAttribute("title", reservation.getTitle());
-            model.addAttribute("description", reservation.getDescription());
+        model.addAttribute("title", reservation.getTitle());
+        model.addAttribute("description", reservation.getDescription());
+        model.addAttribute("isAdd", true);
+
         return "addreservation";
     }
-
-
 }

@@ -1,8 +1,9 @@
-package com.mokhovav.meeting_room_reservation.services;
+package com.mokhovav.meeting_room_reservation.entities.reservation;
 
-import com.mokhovav.meeting_room_reservation.datatables.Reservation;
-import com.mokhovav.meeting_room_reservation.datatables.User;
+import com.mokhovav.meeting_room_reservation.entities.user.User;
+import com.mokhovav.meeting_room_reservation.error.CustomException;
 import com.mokhovav.meeting_room_reservation.responses.DailySchedule;
+import com.mokhovav.meeting_room_reservation.database.DAOService;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -15,10 +16,12 @@ import org.slf4j.Logger;
 public class ReservationService {
     final DAOService daoService;
     final Logger logger;
+    final ReservationValid reservationValid;
 
-    public ReservationService(DAOService daoService, Logger logger) {
+    public ReservationService(DAOService daoService, Logger logger, ReservationValid reservationValid) {
         this.daoService = daoService;
         this.logger = logger;
+        this.reservationValid = reservationValid;
     }
 
     public boolean isExist(Long id) {
@@ -56,28 +59,16 @@ public class ReservationService {
         return (List<Reservation>)daoService.findAll(Reservation.class);
     }
 
-
     public int dayOfWeak() {
         Calendar c = Calendar.getInstance();
         Integer dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
         return dayOfWeek;
     }
 
-    public boolean isValid(User user, String title, String description, Integer duration, String date, String time){
-        return user!=null && title !=null && !title.isEmpty() && duration>0 && date!=null && !date.isEmpty() && time!=null && !time.isEmpty()
-                && getTimeEnd(Timestamp.valueOf(date + " " + time + ":00").getTime(),duration) < dayTimeEnd(date);
-    }
-
     public boolean isCanBeBooked(Reservation reservation){
-        //return true;
-        //return daoService.findObject("from Reservation where timeend>'"+reservation.getTimeBegin().toString()+"' and timebegin<'"+reservation.getTimeEnd().toString()+"'") == null;
         return daoService.findObject("from Reservation where timeend>"+reservation.getTimeBegin()+" and timebegin<"+reservation.getTimeEnd()) == null;
     }
 
-    /*public Timestamp getTimeEnd(Timestamp timeBegin, Integer duration){
-        long temp = duration % 30 == 0 ?  duration : (duration/30 + 1)*30;
-        return new Timestamp(timeBegin.getTime() + temp*60000);
-    }*/
     public long getTimeEnd(long timeBegin, Integer duration){
         long temp = duration % 30 == 0 ?  duration : (duration/30 + 1)*30;
         return timeBegin + temp*60000;
@@ -106,19 +97,13 @@ public class ReservationService {
         cal.set(Calendar.MILLISECOND,0);
         cal.set(Calendar.AM_PM,Calendar.AM);
 
-        //logger.info("Start time: "+dateTimeFormat.format(cal.getTime()));
-
         for(int i = 1; i <= 7; i++) {
-            logger.info("Start conversion");
-           // Map<Long, Reservation> map = new LinkedHashMap<>();
             temp = new DailySchedule();
             temp.dayOfWeek = dayFormat.format(cal.getTime());
             temp.date = dateFormat.format(cal.getTime());
 
             temp.dayStart = cal.getTimeInMillis();
             temp.dayEnd =  temp.dayStart + 86400000;
-            //logger.info("end time: "+ temp.dayEnd );
-            //logger.info("calc time: "+ dayTimeEnd("2020-01-06"));
             temp.reservations = new LinkedHashMap<>();
 
 
@@ -138,10 +123,21 @@ public class ReservationService {
         return list;
     }
 
-    private long dayTimeEnd(String date){
+    public long dayTimeEnd(String date){
         return Timestamp.valueOf(date + " " + "24:00:00").getTime();
     }
-    private long dayTimeStart(String date){
+    public long dayTimeStart(String date){
         return Timestamp.valueOf(date + " " + "00:00:00").getTime();
+    }
+
+    public void addReservation(Reservation reservation, User user, String title, String description, Integer duration, String date, String time) throws CustomException {
+        reservationValid.dataCheck(user,title,description,duration,date,time);
+        if (getTimeEnd(Timestamp.valueOf(date + " " + time + ":00").getTime(), duration) >= dayTimeEnd(date))
+            throw new CustomException("Reservations must end before the end of the day.");
+        reservation.setUser(user);
+        reservation.setTimeBegin(Timestamp.valueOf(date + " " + time + ":00").getTime());
+        reservation.setTimeEnd(getTimeEnd(reservation.getTimeBegin(),duration));
+        if(!isCanBeBooked(reservation)) throw new CustomException("The meeting room will be busy at your chosen time.");
+        save(reservation);
     }
 }

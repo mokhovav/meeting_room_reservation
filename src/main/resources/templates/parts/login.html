@@ -33,7 +33,7 @@
 <body th:fragment="logoutLabel">
     <form th:action="@{/logout}" method="post">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-        <input class="nav-item" type="submit" value="Sign Out"/>
+        <input class="btn btn-primary" type="submit" value="Sign Out"/>
     </form>
 </body>
 

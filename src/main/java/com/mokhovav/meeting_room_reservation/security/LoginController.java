@@ -1,8 +1,9 @@
-package com.mokhovav.meeting_room_reservation.controllers;
+package com.mokhovav.meeting_room_reservation.security;
 
-import com.mokhovav.meeting_room_reservation.datatables.User;
-import com.mokhovav.meeting_room_reservation.services.RoleService;
-import com.mokhovav.meeting_room_reservation.services.UserService;
+import com.mokhovav.meeting_room_reservation.entities.user.User;
+import com.mokhovav.meeting_room_reservation.entities.user.UserService;
+import com.mokhovav.meeting_room_reservation.entities.authority.AuthorityService;
+import com.mokhovav.meeting_room_reservation.error.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -21,11 +22,11 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/user")
 public class LoginController {
     final UserService userService;
-    final RoleService roleService;
+    final AuthorityService authorityService;
 
-    public LoginController(UserService userService, RoleService roleService) {
+    public LoginController(UserService userService, AuthorityService authorityService) {
         this.userService = userService;
-        this.roleService = roleService;
+        this.authorityService = authorityService;
     }
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -44,14 +45,10 @@ public class LoginController {
             model.addAttribute("state", "changePassword");
             return "login";
         }
-        if (state.equals("add")) {
-            model.addAttribute("state", "add");
-            return "login";
-        }
         return "redirect:/";
     }
 
-    @PreAuthorize("hasAuthority('user')")
+    @PreAuthorize("hasAuthority('user') or hasAuthority('admin')")
     @PostMapping("/changePassword")
     public String login(
             @AuthenticationPrincipal User user,
@@ -61,17 +58,17 @@ public class LoginController {
             HttpServletResponse response,
             Model model
     ) {
-        model.addAttribute("state", "changePassword");
-        if (!userService.isValidPassword(password, confirm)) {
-            model.addAttribute("message", "Password incorrect");
+        try{
+            userService.passwordsCheck(password, confirm);
+            user.setPassword(passwordEncoder.encode(password));
+            user.setChangePassword(false);
+            userService.update(user);
+            logoutPage(request, response);
+        }catch (CustomException e){
+            model.addAttribute("message", e.getMessage());
+            model.addAttribute("state", "changePassword");
             return "login";
         }
-        user.setPassword(passwordEncoder.encode(password));
-        user.setChangePassword(false);
-        if (userService.update(user))
-            logoutPage(request, response);
-        else
-            model.addAttribute("message", "Internal Error");
         return "redirect:/";
     }
 

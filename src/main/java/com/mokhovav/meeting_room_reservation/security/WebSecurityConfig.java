@@ -1,36 +1,32 @@
-package com.mokhovav.meeting_room_reservation.configurations;
+package com.mokhovav.meeting_room_reservation.security;
 
-import com.mokhovav.meeting_room_reservation.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import com.mokhovav.meeting_room_reservation.entities.user.UserService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true) //for PreAuthorize
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private  UserService userService;
 
-    @Bean
-    public PasswordEncoder getPasswordEncoder(){
-        return new BCryptPasswordEncoder(10);
+    private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
+
+    public WebSecurityConfig(PasswordEncoder passwordEncoder, UserService userService) {
+        this.passwordEncoder = passwordEncoder;
+        this.userService = userService;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                    .antMatchers("/", "/conferences","/conferences/prevWeek","/conferences/nextWeek")
+                    .antMatchers("/", "/prevWeek","/nextWeek")
                     .permitAll()
                     .anyRequest()
                     .authenticated()

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="https://www.thymeleaf.org">
+
+<head th:replace="parts/common::head"/>
+
+<body>
+    <div th:replace="parts/common::body"></div>
+    <div class="container mt-1 ml-1">
+
+        <label>ADD USER</label>
+        <form th:action="'/controlPanel/addUser'" method="post" modelAttribute="userData">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <div class="form-group row">
+                <label class="col-sm-4 col-md-2 col-form-label">Username:</label>
+                <input class="col-sm-4 col-md-2 form-control"  type="text" name="username" placeholder="User name" th:value="${userData.getUsername()}"/>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-4 col-md-2 col-form-label">Password:</label>
+                <input class="col-sm-4 col-md-2 form-control" type="password" name="password" placeholder="Password" th:value="${userData.getPassword()}"/>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-4 col-md-2 col-form-label">Confirm Password:</label>
+                <input class="col-sm-4 col-md-2 form-control" type="password" name="confirm" placeholder="Confirm password" th:value="${userData.getConfirm()}"/>
+            </div>
+
+            <label name="message" class="col-sm-6 col-form-label"  th:text="${userData.getError()}"/>
+
+            <div class="form-group">
+                <button class="btn btn-primary" type="submit">Add user</button>
+            </div>
+        </form>
+
+        <label>ADD AUTHORITY</label>
+        <form th:action="'/controlPanel/addAuthority'" method="post" modelAttribute="authorityData">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+            <div class="form-group row">
+                <label class="col-sm-4 col-md-2 col-form-label">AUTHORITY : </label>
+                <input class="col-sm-4 col-md-2 form-control" type="text" name="authority" placeholder="user authority" th:value="${authorityData.getAuthority()}"/>
+            </div>
+
+            <label name="message" class="col-sm-6 col-form-label"  th:text="${authorityData.getError()}"/>
+
+            <div class="form-group">
+                <button class="btn btn-primary" type="submit" name="text">Add authority</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="container mt-1 ml-1">
+        <label>LIST OF USERS</label>
+        <table class="table table-bordered table-hover w-50 ">
+            <caption>List of users</caption>
+              <thead class="thead-dark">
+                <tr>
+                    <th class="col-2 text-center">Name</th>
+                    <th class="col-2 text-center">Role</th>
+                    <th class="col-1 text-center"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="user : ${users}" scope="row">
+                    <td class="text-center"><span th:text="${user.getUsername()}"/></td>
+                    <td class="text-center">
+                        <div th:each="role, iterStat : ${user.authorities}">
+                            <span th:text="${!iterStat.last} ? ${role.authority} + ', ': ${role.authority}"></span>
+                        </div>
+                    </td>
+                    <td class="text-center"><a th:href="@{'/controlPanel/'+${user.id}}">edit</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

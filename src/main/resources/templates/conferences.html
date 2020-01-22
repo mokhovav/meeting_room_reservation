@@ -34,11 +34,11 @@
                         <div class="col" style="border-right-style: solid; border-color: white; height: 600px; " th:each="day : ${schedule}" >
                             <div th:each="key : ${day.reservations.keySet()}">
                                 <div th:with="res=${day.reservations.get(key)}">
-                                    <a th:href="@{'/conferences/showReservation/'+${res.getId()}}" style="text-decoration: none;">
+                                    <a th:href="@{'/showReservation/'+${res.getId()}}" style="text-decoration: none;">
                                         <div class="card"
                                              th:style="'color: black; margin-top:' + (600*${key})/(24*3600000) + 'px; height: ' + (600*(${res.getTimeEnd()}-${res.getTimeBegin()}))/(24*3600000) + 'px;'" >
                                             <span style="font-size: xx-small; font-weight: bold; line-height: 100%">[[${res.getTitle()}]]</span>
-                                            <span style="font-size: xx-small; font-weight: bold; line-height: 100%">[[${res.getUserName()}]]</span>
+
                                         </div>
                                     </a>
                                 </div>
@@ -53,11 +53,11 @@
         <div class="container">
             <div class="row" style="width: 1140px; background: palevioletred;">
                 <div class="col-1" style="margin: 25px 0px 25px 0px;">
-                    <a class="page-link" href="/conferences/prevWeek">Prev</a>
+                    <a class="page-link" href="/prevWeek">Prev</a>
                 </div>
                 <div class="col-10 d-flex justify-content-center" style="align-self: center;">
                     <div sec:authorize="isAuthenticated()" class="float-left pagination-detail">
-                        <form th:action="'conferences/addReservation'" method="get">
+                        <form th:action="'addReservation'" method="get">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                             <button class="btn btn-primary" type="submit">Add Reservation</button>
                         </form>
@@ -67,7 +67,7 @@
                     </div>
                 </div>
                 <div class="col-1" style="margin: 25px 0px 25px 0px;">
-                    <a class="page-link" href="/conferences/nextWeek">Next</a>
+                    <a class="page-link" href="/nextWeek">Next</a>
                 </div>
             </div>
         </div>

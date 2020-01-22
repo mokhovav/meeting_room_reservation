@@ -1,0 +1,30 @@
+# The docker-compose file must begin with the version tag.
+# We use "3" since this is the latest version at the time of writing this code.
+version: '3.1'
+
+# Please note that docker-composes works with services.
+# 1 service = 1 container.
+# A service can be a client, server, database server ...
+# The section in which services will be described begins with 'services'.
+services:
+  #service name
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: mrruser
+      POSTGRES_PASSWORD: mrruser
+      POSTGRES_DB: meeting_room_reservation
+    container_name: mrr_postgres_dev
+    ports:
+      - 5432:5432
+    #volumes:
+    #  - ./data/postgres:/var/lib/postgresql/data
+
+ #service name
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+    container_name: mrr_adminer_dev

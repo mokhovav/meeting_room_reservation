@@ -8,22 +8,24 @@
     <div th:replace="parts/common::body"></div>
     <div class="container mt-1 ml-1">
         USER EDITOR
-        <form action="/userControl" method="post">
+        <form th:action="'/controlPanel/editUser'" method="post" modelAttribute="userData">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
             <div class="form-group">
                 <ul class="col-sm-4 col-md-2 list-group">
-                    <li class="list-group-item" th:name="list" th:each="role : ${roles}">
-                        <input type="checkbox" th:name="${role.roleName}" th:checked="${user.isRole(role)}" th:text="${role.roleName}"/>
+                    <li class="list-group-item" th:name="list" th:each="authority : ${authorities}">
+                        <input type="checkbox" th:name="${authority.getAuthority()}" th:checked="${userData.isHaveAuthority(authority)}" th:text="${authority.getAuthority()}"/>
                     </li>
                 </ul>
             </div>
 
+            <input type="hidden" name="id" th:value="${userData.getId()}">
+
             <div class="form-group">
-                <input class="col-sm-4 col-md-2 form-control" type="text" name="userName" th:value="${user.userName}"/>
+                <input class="col-sm-4 col-md-2 form-control" type="text" name="username" th:value="${userData.getUsername()}"/>
             </div>
 
-            <input type="hidden" name="userId" th:value="${user.id}">
+            <label name="message" class="col-sm-6 col-form-label"  th:text="${userData.getError()}"/>
 
             <div class="form-group">
                 <button class="btn btn-primary" type="submit">Save</button>
