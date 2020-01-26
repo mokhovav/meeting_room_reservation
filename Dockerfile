@@ -34,6 +34,7 @@ COPY ./ .
 COPY ./src/main/resources/production/ ./src/main/resources/
 # clean package - delete of all artifacts created during the assembly process
 # spring-boot:repackage - Repackages existing JAR and WAR archives so that they can be executed from the command line using java -jar
+RUN chmod -R 777 .
 RUN ./mvnw clean package spring-boot:repackage
 ###################################################################################################
 
