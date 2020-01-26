@@ -24,6 +24,7 @@ COPY .mvn ./.mvn
 
 # copy pom.xml and fetch all dependencies by switching to offline mode
 COPY pom.xml .
+RUN chmod -R 777 .
 # RUN takes the command as an argument and launches it from the image. Unlike CMD, this command is used to build an image.
 RUN ./mvnw dependency:go-offline
 
@@ -33,7 +34,6 @@ COPY ./ .
 COPY ./src/main/resources/production/ ./src/main/resources/
 # clean package - delete of all artifacts created during the assembly process
 # spring-boot:repackage - Repackages existing JAR and WAR archives so that they can be executed from the command line using java -jar
-RUN chmod -R 777 .
 RUN ./mvnw clean package spring-boot:repackage
 ###################################################################################################
 
