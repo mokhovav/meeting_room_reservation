@@ -1,0 +1,11 @@
+name: Docker Image CI
+on: [push]
+jobs:
+  build:
+    #The type of machine to run the job on. The machine can be either a GitHub-hosted runner, or a self-hosted runner
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)

@@ -15,10 +15,6 @@ MAINTAINER mohovav_zhukovsd
 # set the directory from which the CMD command will be executed. This creates the directory if nonexistent.
 WORKDIR /build
 
-# download all necessary Maven dependencies
-# this will a create cached Docker image layer until pom.xml changes
-# https://medium.com/@nieldw/caching-maven-dependencies-in-a-docker-build-dca6ca7ad612
-
 # COPY command takes two arguments, the path from where to copy the file and the path to copy files to the container’s own file system
 # COPY only supports the basic copying of local files into the container
 # ADD has some features (like local-only tar extraction and remote URL support)
@@ -33,6 +29,8 @@ RUN ./mvnw dependency:go-offline
 
 # copy all sources and build the project
 COPY ./ .
+# copy hibernate.xml from production
+COPY ./src/main/resources/production/ ./src/main/resources/
 # clean package - delete of all artifacts created during the assembly process
 # spring-boot:repackage - Repackages existing JAR and WAR archives so that they can be executed from the command line using java -jar
 RUN ./mvnw clean package spring-boot:repackage

@@ -48,7 +48,7 @@ public class LoginController {
         return "redirect:/";
     }
 
-    @PreAuthorize("hasAuthority('user') or hasAuthority('admin')")
+    //@PreAuthorize("hasAuthority('user') or hasAuthority('admin')")
     @PostMapping("/changePassword")
     public String login(
             @AuthenticationPrincipal User user,
