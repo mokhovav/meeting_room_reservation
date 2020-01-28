@@ -9,11 +9,12 @@ jobs:
       - uses: actions/checkout@master
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag meeting_room_reservation:$(date +%s)
-      - name: Publish
-        uses: actions/docker/login@master
+      - name: Login
+      - uses: actions/docker/login@master
         with:
           login-server: 78.47.167.60:5000
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
+      - name: Push
         run:
           docker push 78.47.167.60:5000/meeting_room_reservation:$(date +%s)
