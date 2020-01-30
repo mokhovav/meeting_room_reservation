@@ -9,10 +9,9 @@ jobs:
       - uses: actions/checkout@master
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag 78.47.167.60:5000/meeting_room_reservation:$(date +%s)
-      - name: Login
-      - uses: actions/docker/login@master
-        with:
-          login-server: 78.47.167.60:5000
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
-      - run: docker push 78.47.167.60:5000/meeting_room_reservation:$(date +%s)
+      - name: CRT
+        run: ghe-ssl-ca-certificate-install -c domain.crt
+      - name Login
+        run: docker login -u ${{ secrets.USERNAME }} -p ${{ secrets.PASSWORD }} 78.47.167.60:5000
+      - name: Push
+        run: docker push 78.47.167.60:5000/meeting_room_reservation:$(date +%s)
