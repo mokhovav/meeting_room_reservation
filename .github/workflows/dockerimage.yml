@@ -3,6 +3,7 @@ on: [push]
 jobs:
   build:
     #The type of machine to run the job on. The machine can be either a GitHub-hosted runner, or a self-hosted runner
+    #./.github/scripts/CRT.sh
     runs-on: ubuntu-latest
 
     steps:
@@ -10,7 +11,7 @@ jobs:
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag 78.47.167.60:5000/meeting_room_reservation:$(date +%s)
       - name: CRT
-        run: ./.github/scripts/CRT.sh
+        run: dockerd --insecure-registries 78.47.167.60:5000
       - name: Login
         run: docker login -u ${{ secrets.USERNAME }} -p ${{ secrets.PASSWORD }} 78.47.167.60:5000
       - name: Push
