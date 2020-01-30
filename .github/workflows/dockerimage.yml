@@ -7,11 +7,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@master
-      - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag 78.47.167.60:5000/meeting_room_reservation:$(date +%s)
+      #- uses: actions/checkout@master
+      #- name: Build the Docker image
+      #  run: docker build . --file Dockerfile --tag 78.47.167.60:5000/meeting_room_reservation:$(date +%s)
       - name: CRT
-        run: dockerd --insecure-registries 78.47.167.60:5000
+        run: dockerd --insecure-registry 78.47.167.60:5000
       - name: Login
         run: docker login -u ${{ secrets.USERNAME }} -p ${{ secrets.PASSWORD }} 78.47.167.60:5000
       - name: Push
