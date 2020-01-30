@@ -10,6 +10,6 @@ jobs:
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag ${{ secrets.SERVERNAME }}/meeting_room_reservation:$(date +%s)
       - name: Login
-        run: docker login -u ${{ secrets.USERNAME }} --password-stdin ${{ secrets.PASSWORD }} ${{ secrets.SERVERNAME }} 
+        run: docker login -u ${{ secrets.USERNAME }} -p ${{ secrets.PASSWORD }} ${{ secrets.SERVERNAME }} 
       - name: Push
         run: docker push ${{ secrets.SERVERNAME }}/meeting_room_reservation:$(date +%s)
