@@ -11,6 +11,6 @@ jobs:
       #- name: Build the Docker image
       #  run: docker build . --file Dockerfile --tag 78.47.167.60:5000/meeting_room_reservation:$(date +%s)
       - name: Login
-        run: docker  --tls --tlscert ./.github/domain.crt --tlskey ./.github/domain.key login -u ${{ secrets.USERNAME }} -p ${{ secrets.PASSWORD }} 78.47.167.60:5000
+        run: docker  --tls --tlscacert ./.github/domain.crt --tlscert ./.github/domain.crt --tlskey ./.github/domain.key login -u ${{ secrets.USERNAME }} -p ${{ secrets.PASSWORD }} 78.47.167.60:5000
       - name: Push
         run: docker push 78.47.167.60:5000/meeting_room_reservation:$(date +%s)
