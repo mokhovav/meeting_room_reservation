@@ -28,6 +28,7 @@ public class AuthorityController {
         User userData = new User();
         try {
             authorityService.save(authority);
+            throw new CustomException("Authority successfully added");
         }
         catch (CustomException e) {
             answer.setError(e.getMessage());

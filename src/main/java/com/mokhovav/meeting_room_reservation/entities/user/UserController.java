@@ -39,7 +39,6 @@ public class UserController {
 
     @GetMapping("{user_id}")
     public String userEditForm(@PathVariable Long user_id, Model model) {
-        //AuthorityData authorityData = new AuthorityData();
         model.addAttribute("userData", userService.getById(user_id));
         model.addAttribute("authorities", authorityService.getAll());
         return "userEdit";
@@ -54,6 +53,7 @@ public class UserController {
             userService.userDataCheck(user);
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             userService.save(user);
+            throw new CustomException("User successfully added");
         } catch (CustomException e) {
             answer.setError(e.getMessage());
         }
@@ -70,6 +70,7 @@ public class UserController {
         String temp = null;
         try {
             userService.userUpdate(userData, list);
+            throw new CustomException("User successfully updated");
         } catch (CustomException e) {
             temp = e.getMessage();
         }

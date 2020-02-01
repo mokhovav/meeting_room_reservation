@@ -94,6 +94,7 @@ public class ReservationController {
         reservation.setDescription(description);
         try {
             reservationService.addReservation(reservation, user, title, description, duration, date, time);
+            throw new CustomException("Reservation successfully added");
         } catch (CustomException e) {
             model.addAttribute("message", e.getMessage());
         }
