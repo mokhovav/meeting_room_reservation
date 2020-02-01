@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      #- uses: actions/checkout@master
+      - uses: actions/checkout@master
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag 78.47.167.60:5000/meeting_room_reservation:$(date +%s)
       - name: Login
